@@ -1,0 +1,3 @@
+[submodule "dependencies/pixeltoaster"]
+	path = dependencies/pixeltoaster
+	url = https://github.com/thedmd/pixeltoaster.git
