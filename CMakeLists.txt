@@ -9,3 +9,7 @@ add_subdirectory(dependencies)
 add_executable(helloworld src/helloworld.cpp)
 target_link_libraries(helloworld PRIVATE PixelToaster)
 target_include_directories(helloworld PRIVATE dependencies/pixeltoaster)
+
+add_executable(linedrawing src/linedrawing.cpp src/image.h)
+target_link_libraries(linedrawing PRIVATE PixelToaster)
+target_include_directories(linedrawing PRIVATE dependencies/pixeltoaster)
