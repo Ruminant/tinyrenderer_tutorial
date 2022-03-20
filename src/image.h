@@ -1,105 +1,75 @@
-#include <PixelToaster.h>
+#pragma once
+
+#include <stdint.h>
 #include <chrono>
-#include <ctime>
-#include <cmath>
 
-namespace pt = PixelToaster;
+/**
+ * @brief simple RGBA colour struct (32-bit)
+ * 
+ * For convenience you can use 4 bytes of R, G, B and A,
+ * or opt for a 32-bit integer version.
+ * 
+ */
+struct Colour
+{
+    union {
+        struct {
+            uint8_t r, g, b, a;
+        };
+        uint32_t col = 0x0;
+    };
 
-using Colour = PixelToaster::TrueColorPixel;
+    Colour(uint8_t rin, uint8_t gin, uint8_t bin, uint8_t ain=0xff)
+        : r(rin)
+        , g(gin)
+        , b(bin)
+        , a(ain) {}
+
+    Colour(uint32_t cin)
+        : col(cin)
+        {}
+
+    Colour():col(0) {}
+
+};
 
 namespace Colours
 {
-    Colour Red = Colour(0xff, 0x00, 0x00);
-    Colour Blue = Colour(0x00, 0x00, 0xff);
-    Colour White = Colour(0xff, 0xff, 0xff);
-    Colour Grey = Colour(0xaa, 0xaa, 0xaa);
-    Colour Yellow = Colour(0xff, 0xff, 0x00);
-    Colour Orange = Colour(0xff, 0x80, 0x00);
+    const Colour Red = Colour(0xff, 0x00, 0x00);
+    const Colour Blue = Colour(0x00, 0x00, 0xff);
+    const Colour White = Colour(0xff, 0xff, 0xff);
+    const Colour Grey = Colour(0xaa, 0xaa, 0xaa);
+    const Colour Yellow = Colour(0xff, 0xff, 0x00);
+    const Colour Orange = Colour(0xff, 0x80, 0x00);
 }
 
 class Image
 {
 public:
-    Image(const char *title, unsigned int width, unsigned int height)
-        : m_width(width)
-        , m_height(height)
-        , m_display(title, width, height)
-    {
-        m_size = width * height;
-        m_pixels = new Colour[m_size];
-    }
-
-    ~Image()
-    {   
-        delete [] m_pixels;
-    }
-
-    void set(unsigned int x, unsigned int y, const Colour &color)
-    {
-        if (y < m_height && x < m_width)
-        {
-            const unsigned int index = (m_height - y) * m_width + x;
-            m_pixels[index] = color;
-        }
-    }
-
-    void show()
-    {
-        while (m_display.open())
-        {
-            m_display.update(m_pixels);
-        }
-    }
-
+    Image(const char *title, unsigned int width, unsigned int height);
+    ~Image();
+    void set(unsigned int x, unsigned int y, const Colour &color);
+    void show();
+    unsigned int get_width() const { return m_width; }
+    unsigned int get_height() const { return m_height; }
 protected:
     unsigned int m_width;
     unsigned int m_height;
     unsigned int m_size;
-    pt::Display m_display;
-    Colour *m_pixels;
+    struct Pimpl;
+    Pimpl *m_pimpl = nullptr;
+
 };
 
-template<typename T>
-T lerp(T a, T b, float alpha)
-{
-    return a + static_cast<T>((b - a) * alpha);
-}
+
 
 class Timer
 {
 public:
-    void start()
-    {
-        m_StartTime = std::chrono::system_clock::now();
-        m_bRunning = true;
-    }
-    
-    void stop()
-    {
-        m_EndTime = std::chrono::system_clock::now();
-        m_bRunning = false;
-    }
-    
-    double elapsedMilliseconds()
-    {
-        std::chrono::time_point<std::chrono::system_clock> endTime;
-        
-        if(m_bRunning)
-        {
-            endTime = std::chrono::system_clock::now();
-        }
-        else
-        {
-            endTime = m_EndTime;
-        }
-        
-        return static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - m_StartTime).count());
-    }
-    
-    double elapsedSeconds()
-    {
-        return elapsedMilliseconds() / 1000.0;
-    }
+    void start();
+    void stop();
+    double elapsedMilliseconds();
+    double elapsedSeconds();
 
 private:
     std::chrono::time_point<std::chrono::system_clock> m_StartTime;
